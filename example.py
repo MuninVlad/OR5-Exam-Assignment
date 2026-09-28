@@ -1,14 +1,3 @@
-"""
-Paint shop scheduling - one file with everything.
-
-Method 1: greedy constructive heuristic -> discrete improving search -> local optimum
-Method 2: metaheuristic (simulated annealing) -> discrete improving search -> local optimum
-
-Run:  python paintshop.py "PaintShop - September 2026.xlsx"
-
-A schedule is a dictionary: machine name -> list of order names (in sequence),
-for example {'M1': ['ORD01', 'ORD03'], 'M2': ['ORD02']}.
-"""
 import math
 import random
 import sys
