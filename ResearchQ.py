@@ -1,11 +1,14 @@
 import pandas as pd
 
+#How would another greedy rule affect the (initial) penalties: Earliest Deadline Date (EDD) or Smallest Surface Area (SSA)
+#run both versions, compare the starting costs
+
 def read_file(sample):
     df_orders = pd.read_excel(sample, sheet_name= 'Orders')
     df_machines = pd.read_excel(sample, sheet_name= 'Machines' )
     df_setups = pd.read_excel(sample, sheet_name= 'Setups' )
 
-    data = {}
+    data = {  }
     data['surface'] = dict(zip(df_orders['Order'],df_orders['Surface']))
     data['colour'] = dict(zip(df_orders['Order'],df_orders['Colour']))
     data['deadline'] = dict(zip(df_orders['Order'],df_orders['Deadline']))
