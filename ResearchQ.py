@@ -8,7 +8,7 @@ def read_file(sample):
     df_machines = pd.read_excel(sample, sheet_name= 'Machines' )
     df_setups = pd.read_excel(sample, sheet_name= 'Setups' )
 
-    data = {  }
+    data = {}
     data['surface'] = dict(zip(df_orders['Order'],df_orders['Surface']))
     data['colour'] = dict(zip(df_orders['Order'],df_orders['Colour']))
     data['deadline'] = dict(zip(df_orders['Order'],df_orders['Deadline']))

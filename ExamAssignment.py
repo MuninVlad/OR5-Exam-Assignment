@@ -23,21 +23,72 @@ def read_file(sample):
 
     return data
 
+
+
+
+# def greedy(data):
+
+#     schedule = {}
+#     for m in data['machines']:
+#         schedule[m] = []
+#     for o in sorted(data['orders'], key=lambda o: data['deadline'][o]):
+#         best_machine = None
+#         best_key = None
+#         for m in data['machines']:
+#             old_cost = machine_cost(.........)
+#             new_cost, finish = machine_cost(.........)
+#             key = (new_cost - old_cost, finish)
+#             if best_key is None or key < best_key:
+#                 best_key = key
+#                 best_machine = m
+#         schedule[best_machine].append(o)
+#     return schedule
+
+
+
 def greedy(data):
-
-    schedule = {}
-    for m in data['machines']:
-        schedule[m] = []
-    for o in sorted(data['orders'], key=lambda o: data['deadline'][o]):
+    schedule = {m: [] for m in data['machines']}
+    m_time = {m: 0 for m in data['machines']}
+    m_color = {m: None for m in data['machines']}
+    unassigned_orders = list(data['surface'].keys())
+    
+    while unassigned_orders:
         best_machine = None
+        best_order = None
         best_key = None
-        for m in data['machines']:
-            old_cost = machine_cost(.........)
-            new_cost, finish = machine_cost(.........)
-            key = (new_cost - old_cost, finish)
-            if best_key is None or key < best_key:
-                best_key = key
-                best_machine = m
-        schedule[best_machine].append(o)
-    return schedule
+        best_end_time = 0
+        best_color = None
 
+        for o in unassigned_orders:
+            for m in data['machines']:
+                prev_color = m_color[m]
+                curr_color = data['colour'][o]
+                
+                setup_time = 0
+                if prev_color is not None and prev_color != curr_color:
+                    setup_time = data['setup'].get((prev_color, curr_color), 0)
+                
+                start_time = m_time[m] + setup_time
+                proc_time = data['surface'][o] / data['speed'][m]
+                end_time = start_time + proc_time
+                
+                lateness = max(0, end_time - data['deadline'][o])
+                added_cost = lateness * data['penalty'][o]
+                
+                key = (added_cost, end_time)
+                
+                if best_key is None or key < best_key:
+                    best_key = key
+                    best_machine = m
+                    best_order = o
+                    best_end_time = end_time
+                    best_color = curr_color
+                    
+        
+        schedule[best_machine].append(best_order)
+        m_time[best_machine] = best_end_time
+        m_color[best_machine] = best_color
+        
+        unassigned_orders.remove(best_order)
+        
+    return schedule
