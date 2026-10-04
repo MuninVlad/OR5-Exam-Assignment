@@ -46,6 +46,36 @@ def read_file(sample):
 
 
 
+def calculate_objective(schedule, data):
+    total_penalty = 0
+    
+    for m, sequence in schedule.items():
+        current_time = 0
+        prev_color = None
+        speed = data['speed'][m]
+        
+        for o in sequence:
+            curr_color = data['colour'][o]
+            
+            setup_time = 0
+            if prev_color is not None and prev_color != curr_color:
+                setup_time = data['setup'].get((prev_color, curr_color), 0)
+            
+            start_time = current_time + setup_time
+            proc_time = data['surface'][o] / speed
+            end_time = start_time + proc_time
+            
+            lateness = max(0, end_time - data['deadline'][o])
+            cost = lateness * data['penalty'][o]
+            total_penalty += cost
+            
+            current_time = end_time
+            prev_color = curr_color
+            
+    return total_penalty
+
+
+
 def greedy(data):
     schedule = {m: [] for m in data['machines']}
     m_time = {m: 0 for m in data['machines']}
