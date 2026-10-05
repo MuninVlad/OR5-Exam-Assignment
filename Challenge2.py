@@ -53,4 +53,4 @@ print(f'edd_total = {edd_total}')
 
 final_schedule, final_total = swap_rows(df)
 print(f'Final schedule is \n{final_schedule}')
-print(f'Final_total is {final_total}')
+print(f'Final_total is {final_total}') 
