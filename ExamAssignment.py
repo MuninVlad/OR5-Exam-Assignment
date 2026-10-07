@@ -123,5 +123,3 @@ def greedy(data):
         
     return schedule
 
-
-
