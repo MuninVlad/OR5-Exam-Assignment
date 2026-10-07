@@ -123,3 +123,58 @@ def greedy(data):
         
     return schedule
 
+<<<<<<< HEAD
+=======
+
+import copy
+def local_search(schedule, data):
+    best_schedule = copy.deepcopy(schedule)
+    best_cost = calculate_objective(best_schedule, data)
+    
+    improved = True
+    
+    while improved:
+        improved = False
+        
+
+        for m1 in data['machines']:
+            if improved: break
+            for i in range(len(best_schedule[m1])):
+                if improved: break
+                
+                for m2 in data['machines']:
+                    if improved: break
+                    for j in range(len(best_schedule[m2]) + 1): #+1 so we can add at the end
+                        
+                        if m1 == m2 and i == j:
+                            continue #skips the rest of the loop
+                            
+                        candidate = copy.deepcopy(best_schedule)
+                        order = candidate[m1].pop(i)
+                        candidate[m2].insert(j, order)
+                        
+                        candidate_cost = calculate_objective(candidate, data)
+                        
+                        if candidate_cost < best_cost:
+                            best_schedule = candidate
+                            best_cost = candidate_cost
+                            improved = True
+                            break 
+
+    return best_schedule
+
+
+
+
+file = 'PaintShop - September 2026.xlsx'
+data = read_file(file)
+
+greedy_schedule = greedy(data)
+greedy_cost = calculate_objective(greedy_schedule, data)
+print(f"Greedy Cost: {greedy_cost}")
+
+
+ls_schedule = local_search(greedy_schedule, data)
+ls_cost = calculate_objective(ls_schedule, data)
+print(f"Local Search Cost: {ls_cost}")
+>>>>>>> 4bcdbea7d2ccb0d2ed06d806d3db94ad4b982e70
