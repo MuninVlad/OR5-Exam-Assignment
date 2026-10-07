@@ -26,26 +26,6 @@ def read_file(sample):
 
 
 
-# def greedy(data):
-
-#     schedule = {}
-#     for m in data['machines']:
-#         schedule[m] = []
-#     for o in sorted(data['orders'], key=lambda o: data['deadline'][o]):
-#         best_machine = None
-#         best_key = None
-#         for m in data['machines']:
-#             old_cost = machine_cost(.........)
-#             new_cost, finish = machine_cost(.........)
-#             key = (new_cost - old_cost, finish)
-#             if best_key is None or key < best_key:
-#                 best_key = key
-#                 best_machine = m
-#         schedule[best_machine].append(o)
-#     return schedule
-
-
-
 def calculate_objective(schedule, data):
     total_penalty = 0
     
