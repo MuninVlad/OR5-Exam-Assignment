@@ -123,8 +123,6 @@ def greedy(data):
         
     return schedule
 
-<<<<<<< HEAD
-=======
 
 import copy
 def local_search(schedule, data):
@@ -177,4 +175,3 @@ print(f"Greedy Cost: {greedy_cost}")
 ls_schedule = local_search(greedy_schedule, data)
 ls_cost = calculate_objective(ls_schedule, data)
 print(f"Local Search Cost: {ls_cost}")
->>>>>>> 4bcdbea7d2ccb0d2ed06d806d3db94ad4b982e70
