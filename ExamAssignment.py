@@ -123,8 +123,6 @@ def greedy(data):
         
     return schedule
 
-<<<<<<< HEAD
-=======
 
 import copy
 def local_search(schedule, data):
