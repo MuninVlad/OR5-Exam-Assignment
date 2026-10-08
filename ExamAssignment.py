@@ -1,4 +1,5 @@
 import pandas as pd
+import copy
 
 def read_file(sample):
     df_orders = pd.read_excel(sample, sheet_name= 'Orders')
@@ -104,7 +105,8 @@ def greedy(data):
     return schedule
 
 
-import copy
+
+
 def local_search(schedule, data):
     best_schedule = copy.deepcopy(schedule)
     best_cost = calculate_objective(best_schedule, data)
