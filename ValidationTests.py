@@ -1,3 +1,5 @@
+import ExamAssignment as e
+
 def run_validation_tests():
 
     # tiny, fake dataset where we know the math by hand.
@@ -24,7 +26,7 @@ def run_validation_tests():
 
     # TEST 1: Objective Function Calculation Validation
     
-    calculated_cost = calculate_objective(mock_schedule, mock_data)
+    calculated_cost = e.calculate_objective(mock_schedule, mock_data)
     if calculated_cost == 25:
         print("Test 1 Passed: Objective function calculated exactly 25.")
     else:
@@ -36,7 +38,7 @@ def run_validation_tests():
     # TEST 2: Schedule Validity (No missing or duplicate orders)
     
     # run the greedy heuristic on the mock data to see if it generates a legal schedule.
-    greedy_sched = greedy(mock_data)
+    greedy_sched = e.greedy(mock_data)
 
     scheduled_orders = []
     for m in greedy_sched:
