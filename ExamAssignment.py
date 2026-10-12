@@ -129,15 +129,15 @@ def local_search(schedule, data):
                         if m1 == m2 and i == j:
                             continue #skips the rest of the loop
                             
-                        candidate = copy.deepcopy(best_schedule)
-                        order = candidate[m1].pop(i)
-                        candidate[m2].insert(j, order)
+                        new_schedule = copy.deepcopy(best_schedule)
+                        order = new_schedule[m1].pop(i)
+                        new_schedule[m2].insert(j, order)
                         
-                        candidate_cost = calculate_objective(candidate, data)
+                        new_schedule_cost = calculate_objective(new_schedule, data)
                         
-                        if candidate_cost < best_cost:
-                            best_schedule = candidate
-                            best_cost = candidate_cost
+                        if new_schedule_cost < best_cost:
+                            best_schedule = new_schedule
+                            best_cost = new_schedule_cost
                             improved = True
                             break 
 
@@ -146,7 +146,7 @@ def local_search(schedule, data):
 
 
 
-file = 'PaintShop - September 2026.xlsx'
+file = 'PaintShop - November 2026.xlsx'
 data = read_file(file)
 
 greedy_schedule = greedy(data)
