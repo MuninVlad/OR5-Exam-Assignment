@@ -206,23 +206,22 @@ def improving_search(start, data):
         current_obj = best_neighbor_obj
 
 
-def run_method_1(data):
-    start_time = time.time()
-    greedy_solution = greedy(data)
-    greedy_obj = calculate_objective(greedy_solution, data)
-    final_solution = improving_search(greedy_solution, data)
-    final_obj = calculate_objective(final_solution, data)
-    run_time = time.time() - start_time
-
-    print("  Method 1 | greedy:", greedy_obj, "| after improving search:", final_obj,
-          "| time: %.1f s" % run_time)
-    return final_solution, greedy_obj, final_obj, run_time
-
-
 data = read_file(FILE_NAME)
-best_solution, greedy_obj, final_obj, run_time = run_method_1(data)
+
+start_time = time.time()
+
+# greedy constructive heuristic
+greedy_solution = greedy(data)
+greedy_obj = calculate_objective(greedy_solution, data)
+
+# improving search until local optimum
+final_solution = improving_search(greedy_solution, data)
+final_obj = calculate_objective(final_solution, data)
+
+run_time = time.time() - start_time
 
 print("\nGreedy:         penalty =", greedy_obj[0], ", setup =", greedy_obj[1])
 print("Final result:   penalty =", final_obj[0], ", setup =", final_obj[1])
-for m in range(len(best_solution)):
-    print(data['machines'][m], best_solution[m])
+print("Time: %.1f s" % run_time)
+for m in range(len(final_solution)):
+    print(data['machines'][m], final_solution[m])

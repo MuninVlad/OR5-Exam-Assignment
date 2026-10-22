@@ -271,34 +271,6 @@ def simulated_annealing(start, data):
 
     return best, history
 
-def run_method_2(data):
-    best_solution = None
-    best_obj = None
-    best_history = None
-    results = []   
-
-    for seed in range(NUMBER_OF_RUNS):
-        random.seed(seed)
-        start_time = time.time()
-        sa_solution, history = simulated_annealing(random_start(data), data)
-        sa_obj = calculate_objective(sa_solution, data)
-        final_solution = improving_search(sa_solution, data)
-        final_obj = calculate_objective(final_solution, data)
-        run_time = time.time() - start_time
-
-        print("  Method 2 | seed", seed, "| after SA:", sa_obj, "| after improving search:", final_obj,
-              "| time: %.1f s" % run_time)
-        results.append((seed, sa_obj, final_obj, run_time))
-
-        if best_obj is None or is_better(final_obj, best_obj):
-            best_solution = final_solution
-            best_obj = final_obj
-            best_history = history
-
-    return best_solution, best_obj, best_history, results
-
-
-
 def plot_progress(history, title, file_name):
     iterations = [h[0] for h in history]
     current_values = [h[1] for h in history]
@@ -325,11 +297,55 @@ def plot_progress(history, title, file_name):
 
 
 data = read_file(FILE_NAME)
-best_solution, best_obj, best_history, results = run_method_2(data)
 
-average = sum(r[2][0] for r in results) / len(results)
+best_solution = None
+best_obj = None
+best_history = None
+all_results = []   # penalty of every run, for the average
+all_times = []     # time of every run, for the average
+
+total_start_time = time.time()
+
+for seed in range(NUMBER_OF_RUNS):
+    random.seed(seed)
+    start_time = time.time()
+
+    # step 1: random start
+    start_solution = random_start(data)
+
+    # step 2: simulated annealing
+    sa_solution, history = simulated_annealing(start_solution, data)
+    sa_obj = calculate_objective(sa_solution, data)
+    sa_time = time.time() - start_time
+
+    # step 3: improving search until local optimum
+    search_start_time = time.time()
+    final_solution = improving_search(sa_solution, data)
+    final_obj = calculate_objective(final_solution, data)
+    search_time = time.time() - search_start_time
+
+    run_time = time.time() - start_time
+    all_results.append(final_obj[0])
+    all_times.append(run_time)
+
+    print("Seed", seed, "| after SA:", sa_obj, "| after improving search:", final_obj)
+    print("        time SA: %.1f s | time improving search: %.1f s | total: %.1f s"
+          % (sa_time, search_time, run_time))
+
+    # keep the best run
+    if best_obj is None or is_better(final_obj, best_obj):
+        best_solution = final_solution
+        best_obj = final_obj
+        best_history = history
+
+total_time = time.time() - total_start_time
+average = sum(all_results) / len(all_results)
+average_time = sum(all_times) / len(all_times)
+
 print("\nBest result:    penalty =", best_obj[0], ", setup =", best_obj[1])
-print("Average result: penalty = %.2f over %d runs" % (average, len(results)))
+print("Average result: penalty = %.2f over %d runs" % (average, NUMBER_OF_RUNS))
+print("Average time per run: %.1f s" % average_time)
+print("Total time of all runs: %.1f s" % total_time)
 for m in range(len(best_solution)):
     print(data['machines'][m], best_solution[m])
 
