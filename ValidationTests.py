@@ -1,4 +1,4 @@
-import ExamAssignment as e
+import TheWholeCode as e
 import time
 import itertools
 
@@ -95,7 +95,7 @@ def run_validation_tests():
         start_orders.extend(start_sched[m])
 
     t0 = time.time()
-    result = e.local_search(start_sched, data_2)
+    result = e.improving_search(start_sched, data_2)
     elapsed = time.time() - t0
     result_cost = e.calculate_objective(result, data_2)
     result_orders = []
@@ -118,7 +118,7 @@ def run_validation_tests():
 
     # TEST 5: Compare local search with an exhaustive search on mock_data
     
-    mock_result = e.local_search(mock_schedule, mock_data)
+    mock_result = e.improving_search(mock_schedule, mock_data)
     mock_result_cost = e.calculate_objective(mock_result, mock_data)
 
     lowest_cost_of_all = None
