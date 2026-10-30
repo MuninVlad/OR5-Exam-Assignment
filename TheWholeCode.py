@@ -72,7 +72,7 @@ def get_setup_time(previous_colour, colour, data):
     # no setup on a clean machine or when the colour stays the same
     if previous_colour is None or previous_colour == colour:
         return 0
-    return data['setup'][(previous_colour, colour)]
+    return data['setup'].get((previous_colour, colour),)
 
 
 # objective
@@ -448,71 +448,71 @@ def plot_progress(history, title, file_name):
 
 
 
+if __name__ == "__main__" : 
+    data = read_file(FILE_NAME)
+    print("Dataset:", DATASET_NAME, "|", len(data['orders']), "orders,", len(data['machines']), "machines")
 
-data = read_file(FILE_NAME)
-print("Dataset:", DATASET_NAME, "|", len(data['orders']), "orders,", len(data['machines']), "machines")
+    # running method 1
+    print("\n----- Method 1 -----")
+    start_time = time.time()
 
-# running method 1
-print("\n----- Method 1 -----")
-start_time = time.time()
+    greedy_solution = greedy(data)
+    greedy_obj = calculate_objective(greedy_solution, data)
 
-greedy_solution = greedy(data)
-greedy_obj = calculate_objective(greedy_solution, data)
+    final_solution_1 = improving_search(greedy_solution, data)
+    final_obj_1 = calculate_objective(final_solution_1, data)
 
-final_solution_1 = improving_search(greedy_solution, data)
-final_obj_1 = calculate_objective(final_solution_1, data)
+    time_1 = time.time() - start_time
 
-time_1 = time.time() - start_time
+    print("Greedy:                 penalty =", greedy_obj[0], ", setup =", greedy_obj[1])
+    print("After improving search: penalty =", final_obj_1[0], ", setup =", final_obj_1[1])
+    print("Time: %.1f s" % time_1)
 
-print("Greedy:                 penalty =", greedy_obj[0], ", setup =", greedy_obj[1])
-print("After improving search: penalty =", final_obj_1[0], ", setup =", final_obj_1[1])
-print("Time: %.1f s" % time_1)
+    # running method 2
+    print("\n----- Method 2 -----")
+    start_time = time.time()
 
-# running method 2
-print("\n----- Method 2 -----")
-start_time = time.time()
+    final_solution_2 = None
+    final_obj_2 = None
+    best_history = None
+    all_results = []
 
-final_solution_2 = None
-final_obj_2 = None
-best_history = None
-all_results = []
+    for seed in range(NUMBER_OF_RUNS):
+        random.seed(seed)
+        sa_solution, history = simulated_annealing(random_start(data), data)
+        sa_obj = calculate_objective(sa_solution, data)
 
-for seed in range(NUMBER_OF_RUNS):
-    random.seed(seed)
-    sa_solution, history = simulated_annealing(random_start(data), data)
-    sa_obj = calculate_objective(sa_solution, data)
+        final_solution = improving_search(sa_solution, data)
+        final_obj = calculate_objective(final_solution, data)
+        all_results.append(final_obj[0])
 
-    final_solution = improving_search(sa_solution, data)
-    final_obj = calculate_objective(final_solution, data)
-    all_results.append(final_obj[0])
+        print("Seed", seed, "| after SA:", sa_obj, "| after improving search:", final_obj)
 
-    print("Seed", seed, "| after SA:", sa_obj, "| after improving search:", final_obj)
+        # keep the best run
+        if final_obj_2 is None or is_better(final_obj, final_obj_2):
+            final_solution_2 = final_solution
+            final_obj_2 = final_obj
+            best_history = history
 
-    # keep the best run
-    if final_obj_2 is None or is_better(final_obj, final_obj_2):
-        final_solution_2 = final_solution
-        final_obj_2 = final_obj
-        best_history = history
+    time_2 = time.time() - start_time
 
-time_2 = time.time() - start_time
+    print("Best result:    penalty =", final_obj_2[0], ", setup =", final_obj_2[1])
+    print("Average result: penalty = %.2f over %d runs" % (sum(all_results) / len(all_results), NUMBER_OF_RUNS))
+    print("Time: %.1f s in total, %.1f s per run" % (time_2, time_2 / NUMBER_OF_RUNS))
 
-print("Best result:    penalty =", final_obj_2[0], ", setup =", final_obj_2[1])
-print("Average result: penalty = %.2f over %d runs" % (sum(all_results) / len(all_results), NUMBER_OF_RUNS))
-print("Time: %.1f s in total, %.1f s per run" % (time_2, time_2 / NUMBER_OF_RUNS))
+    # the output
+    print("\n----- Output -----")
+    plot_gantt(final_solution_1, data, DATASET_NAME + " - Method 1 (greedy + improving search)",
+                "gantt_" + DATASET_NAME + "_method1.png")
+    plot_gantt(final_solution_2, data, DATASET_NAME + " - Method 2 (SA + improving search)",
+                "gantt_" + DATASET_NAME + "_method2.png")
+    plot_progress(best_history, DATASET_NAME + " - simulated annealing progress (best run)",
+                    "sa_progress_" + DATASET_NAME + ".png")
 
-# the output
-print("\n----- Output -----")
-plot_gantt(final_solution_1, data, DATASET_NAME + " - Method 1 (greedy + improving search)",
-            "gantt_" + DATASET_NAME + "_method1.png")
-plot_gantt(final_solution_2, data, DATASET_NAME + " - Method 2 (SA + improving search)",
-            "gantt_" + DATASET_NAME + "_method2.png")
-plot_progress(best_history, DATASET_NAME + " - simulated annealing progress (best run)",
-                "sa_progress_" + DATASET_NAME + ".png")
-
-# the Excel file gets the best schedule of the two methods
-if is_better(final_obj_2, final_obj_1):
-    print("Best schedule: Method 2")
-    export_excel(final_solution_2, data, "Schedule - " + DATASET_NAME + ".xlsx")
-else:
-    print("Best schedule: Method 1")
-    export_excel(final_solution_1, data, "Schedule - " + DATASET_NAME + ".xlsx")
+    # the Excel file gets the best schedule of the two methods
+    if is_better(final_obj_2, final_obj_1):
+        print("Best schedule: Method 2")
+        export_excel(final_solution_2, data, "Schedule - " + DATASET_NAME + ".xlsx")
+    else:
+        print("Best schedule: Method 1")
+        export_excel(final_solution_1, data, "Schedule - " + DATASET_NAME + ".xlsx")

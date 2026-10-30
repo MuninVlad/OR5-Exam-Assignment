@@ -7,16 +7,17 @@ def run_validation_tests():
 
     # tiny, fake dataset where we know the math by hand.
     mock_data = {
+        'orders': ['Order1', 'Order2'],
         'surface': {'Order1': 10, 'Order2': 20},
         'colour': {'Order1': 'Red', 'Order2': 'Blue'},
         'deadline': {'Order1': 5, 'Order2': 15},
         'penalty': {'Order1': 10, 'Order2': 5},
         'speed': {'M1': 2.0},  # Machine 1 processes 2 surface units per minute
         'machines': ['M1'],
-        'setup': {('Red', 'Blue'): 5} # 5 minutes to switch from Red to Blue
+        'setup': {('Red', 'Blue'): 5,('Blue', 'Red'): 5} # 5 minutes to switch from Red to Blue
     }
     # Fake schedule
-    mock_schedule = {'M1': ['Order1', 'Order2']}
+    mock_schedule = [['Order1', 'Order2']]
 
     # Math calculation by hand:
     # Order1: starts at 0, proc = 10/2 = 5, ends at 5. Lateness = 0. Cost = 0.
@@ -29,7 +30,7 @@ def run_validation_tests():
 
     # TEST 1: Objective Function Calculation Validation
     
-    calculated_cost = e.calculate_objective(mock_schedule, mock_data)
+    calculated_cost, setup_cost = e.calculate_objective(mock_schedule, mock_data)
     if calculated_cost == 25:
         print("Test 1 Passed: Objective function calculated exactly 25.")
     else:
@@ -44,8 +45,8 @@ def run_validation_tests():
     greedy_sched = e.greedy(mock_data)
 
     scheduled_orders = []
-    for m in greedy_sched:
-        scheduled_orders.extend(greedy_sched[m])
+    for machine_orders in greedy_sched:
+        scheduled_orders.extend(machine_orders)
         
     # Did it schedule exactly 2 orders?
     if len(scheduled_orders) == 2:
@@ -69,6 +70,7 @@ def run_validation_tests():
 
     #more data -  3 machines, 6 orders
     data_2 = {
+        'orders': ['Order1', 'Order2', 'Order3', 'Order4', 'Order5', 'Order6'],
         'surface': {'Order1': 10, 'Order2': 20, 'Order3': 8,
                     'Order4': 15, 'Order5': 12, 'Order6': 18},
         'colour': {'Order1': 'Red', 'Order2': 'Blue', 'Order3': 'Red',
@@ -91,16 +93,16 @@ def run_validation_tests():
     start_sched = e.greedy(data_2)
     start_cost = e.calculate_objective(start_sched, data_2)
     start_orders = []
-    for m in start_sched:
-        start_orders.extend(start_sched[m])
+    for machine_orders in start_sched:
+        start_orders.extend(machine_orders)
 
     t0 = time.time()
     result = e.improving_search(start_sched, data_2)
     elapsed = time.time() - t0
     result_cost = e.calculate_objective(result, data_2)
     result_orders = []
-    for m in result:
-        result_orders.extend(result[m])
+    for machine_orders in result:
+        result_orders.extend(machine_orders)
 
     # TEST 3: Same orders before and after local search
     if sorted(result_orders) == sorted(start_orders):
@@ -123,7 +125,7 @@ def run_validation_tests():
 
     lowest_cost_of_all = None
     for sequence in itertools.permutations(['Order1', 'Order2']):
-        sched = {'M1': list(sequence)}
+        sched = [list(sequence)]
         c = e.calculate_objective(sched, mock_data)
         if lowest_cost_of_all is None or c < lowest_cost_of_all:
             lowest_cost_of_all = c
@@ -133,7 +135,29 @@ def run_validation_tests():
               "so the objective function or the schedule is wrong.")
     elif mock_result_cost == lowest_cost_of_all:
         print(f"Test 5 Passed: Local search reached the global best ({lowest_cost_of_all}).")
+
+    #TEST 6: setup time is 0 when same color runs
+    same_color_sched = [['Order1', 'Order3']]  # Order1 and Order3 are both Red in data_2
+    pen, setup = e.calculate_objective(same_color_sched, data_2)
+    if setup == 0:
+        print("Test 6 Passed: Zero setup time for same color transition.")
+    else:
+        print(f"Test 6 FAILED: Expected setup to be 0, but got {setup}.")
+
+    #Test 7: Relocate and swap shas correct job count and no duplicates or missing
+    test_sched = [['Order1', 'Order2'], ['Order3', 'Order4'], ['Order5', 'Order6']]
     
+    relocated = e.relocate(test_sched, 0, 1, 1, 0) # move Order2 to start of M2
+    swapped = e.swap(test_sched, 0, 0, 2, 1)      # swap Order1 and Order6
+    
+    # Check total order count remains 6
+    r_orders = [o for m in relocated for o in m]
+    s_orders = [o for m in swapped for o in m]
+    
+    if len(r_orders) == 6 and len(s_orders) == 6:
+        print("Test 8 Passed: After moving orders, machines have the same length .")
+    else:
+        print("Test 8 FAILED: Move operators lost or duplicated orders.")
 
 run_validation_tests()
 
