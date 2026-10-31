@@ -155,10 +155,29 @@ def run_validation_tests():
     s_orders = [o for m in swapped for o in m]
     
     if len(r_orders) == 6 and len(s_orders) == 6:
-        print("Test 8 Passed: After moving orders, machines have the same length .")
+        print("Test 7 Passed: After moving orders, machines have the same length .")
     else:
-        print("Test 8 FAILED: Move operators lost or duplicated orders.")
+        print("Test 7 FAILED: Move operators lost or duplicated orders.")
+
+    # TEST 8: Simulated Annealing 
+    start_sa_sched = e.random_start(data_2)
+    start_sa_obj = e.calculate_objective(start_sa_sched, data_2)
+    best_sa_sched, sa_history = e.simulated_annealing(start_sa_sched, data_2)
+    best_sa_obj = e.calculate_objective(best_sa_sched, data_2)
+    if e.is_better(best_sa_obj, start_sa_obj) or best_sa_obj == start_sa_obj:
+        print(f"Test 8 Passed: SA improved/maintained cost ({start_sa_obj[0]} -> {best_sa_obj[0]}).")
+    else:
+        print("Test 8 FAILED: SA resulted in a worse cost.")   
+
+    # TEST 9: Schedule Output Table Structure
+    rows = e.build_schedule_table(start_sched, data_2)
+    required_cols = {'Order', 'Machine', 'SeqNo', 'Setup', 'Start', 'Process', 'End', 'Deadline', 'Tardiness', 'Penalty', 'Cost'}
+    if len(rows) == len(data_2['orders']) and required_cols.issubset(rows[0].keys()):
+        print("Test 9 Passed: build_schedule_table generated complete output rows.")
+    else:
+        print("Test 9 FAILED: Schedule table rows or columns missing.")    
 
 run_validation_tests()
+
 
 
